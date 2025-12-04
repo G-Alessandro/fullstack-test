@@ -10,7 +10,7 @@
     "read": ["*"],
     "update": ["*"]
   },
-  "balance": {
+  "transactions": {
     "create": ["*"],
     "read": ["*"],
     "update": ["*"],

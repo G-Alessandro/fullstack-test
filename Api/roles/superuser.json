@@ -12,7 +12,7 @@
     "update:any": ["*"],
     "delete:any": ["*"]
   },
-  "balance": {
+  "transactions": {
     "create:any": ["*"],
     "read:any": ["*"],
     "update:any": ["*"],
