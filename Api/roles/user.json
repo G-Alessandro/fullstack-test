@@ -5,8 +5,5 @@
   },
   "companies": {
     "read": ["*"]
-  },
-  "balance": {
-    "read": ["*"]
   }
 }
