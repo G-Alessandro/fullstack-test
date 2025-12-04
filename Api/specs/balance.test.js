@@ -3,11 +3,18 @@ const app = require('../app');
 const db = require('../db/connect-test');
 const User = require('../models/user');
 const Company = require('../models/company');
+const Balance = require('../models/balance');
+
 const { genereteAuthToken } = require('../helpers/auth');
 
 const agent = supertest.agent(app);
 
+let admin;
+let adminToken;
 let company1;
+let balance1;
+let balance2;
+let balance3;
 
 beforeAll(async () => await db.connect());
 beforeEach(async () => {
@@ -25,7 +32,54 @@ beforeEach(async () => {
       vatNumber: 'IT1234567890'
     }).save();
   };
-  return Promise.all([Company1Creation()]);
+
+  const AdminCreation = async () => {
+    admin = await new User({
+      name: 'Admin',
+      lastname: 'Admin',
+      email: 'admin@meblabs.com',
+      password: 'testtest',
+      active: true,
+      company: {
+        id: company1.id,
+        name: company1.name,
+        roles: ['admin']
+      }
+    }).save();
+
+    adminToken = genereteAuthToken(admin).token;
+  };
+
+  const Balance1Creation = async () => {
+    balance1 = await new Balance({
+      userId: admin._id.toString(),
+      value: 100,
+      isExpense: false,
+      description: 'Weekly food shopping',
+      date: '2025-01-14'
+    }).save();
+  };
+  const Balance2Creation = async () => {
+    balance2 = await new Balance({
+      userId: admin._id.toString(),
+      value: 120,
+      isExpense: false,
+      description: 'Monthly salary',
+      date: '2025-01-27'
+    }).save();
+  };
+  const Balance3Creation = async () => {
+    balance3 = await new Balance({
+      userId: admin._id.toString(),
+      value: 250,
+      isExpense: true,
+      description: 'Dinner with friends',
+      date: '2025-01-31'
+    }).save();
+  };
+  return Company1Creation()
+    .then(() => AdminCreation())
+    .then(() => Promise.all([Balance1Creation(), Balance2Creation(), Balance3Creation()]));
 });
 afterEach(async () => await jest.clearAllMocks());
 afterAll(async () => await db.close());
@@ -50,8 +104,158 @@ describe('Role: superadmin', () => {
     return SuperuserCreation();
   });
 
+  describe('GET /balance', () => {
+    test('Get all transactions', () =>
+      agent
+        .get('/balance?sorter=date')
+        .set('Cookie', `accessToken=${token}`)
+        .expect(200)
+        .then(res =>
+          expect(res.body).toStrictEqual({
+            transactions: [
+              {
+                _id: balance1.id,
+                userId: expect.any(String),
+                value: 100,
+                isExpense: false,
+                description: 'Weekly food shopping',
+                date: new Date('2025-01-14').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              },
+              {
+                _id: balance2.id,
+                userId: expect.any(String),
+                value: 120,
+                isExpense: false,
+                description: 'Monthly salary',
+                date: new Date('2025-01-27').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              },
+              {
+                _id: balance3.id,
+                userId: expect.any(String),
+                value: 250,
+                isExpense: true,
+                description: 'Dinner with friends',
+                date: new Date('2025-01-31').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              }
+            ],
+            balance: {
+              totalIncome: 220,
+              totalExpense: 250,
+              totalBalance: -30
+            }
+          })
+        ));
+
+    test('Get all transactions filtered by isExpense', () =>
+      agent
+        .get('/balance?sorter=date&isExpense=false')
+        .set('Cookie', `accessToken=${token}`)
+        .expect(200)
+        .then(res =>
+          expect(res.body).toStrictEqual({
+            transactions: [
+              {
+                _id: balance1.id,
+                userId: expect.any(String),
+                value: 100,
+                isExpense: false,
+                description: 'Weekly food shopping',
+                date: new Date('2025-01-14').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              },
+              {
+                _id: balance2.id,
+                userId: expect.any(String),
+                value: 120,
+                isExpense: false,
+                description: 'Monthly salary',
+                date: new Date('2025-01-27').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              }
+            ],
+            balance: {
+              totalIncome: 220,
+              totalExpense: 250,
+              totalBalance: -30
+            }
+          })
+        ));
+
+    test('Get all transactions filtered by description', () =>
+      agent
+        .get('/balance?sorter=date&filter=mon')
+        .set('Cookie', `accessToken=${token}`)
+        .expect(200)
+        .then(res =>
+          expect(res.body).toStrictEqual({
+            transactions: [
+              {
+                _id: balance2.id,
+                userId: expect.any(String),
+                value: 120,
+                isExpense: false,
+                description: 'Monthly salary',
+                date: new Date('2025-01-27').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              }
+            ],
+            balance: {
+              totalIncome: 220,
+              totalExpense: 250,
+              totalBalance: -30
+            }
+          })
+        ));
+
+    test('Get all transactions sorted by decreasing value', () =>
+      agent
+        .get('/balance?sorter=-value&isExpense=false')
+        .set('Cookie', `accessToken=${token}`)
+        .expect(200)
+        .then(res =>
+          expect(res.body).toStrictEqual({
+            transactions: [
+              {
+                _id: balance2.id,
+                userId: expect.any(String),
+                value: 120,
+                isExpense: false,
+                description: 'Monthly salary',
+                date: new Date('2025-01-27').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              },
+              {
+                _id: balance1.id,
+                userId: expect.any(String),
+                value: 100,
+                isExpense: false,
+                description: 'Weekly food shopping',
+                date: new Date('2025-01-14').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              }
+            ],
+            balance: {
+              totalIncome: 220,
+              totalExpense: 250,
+              totalBalance: -30
+            }
+          })
+        ));
+  });
+
   describe('POST /balance', () => {
-    test('Create a balance with all fields', () =>
+    test('Create a transaction with all fields', () =>
       agent
         .post('/balance')
         .set('Cookie', `accessToken=${token}`)
@@ -199,34 +403,161 @@ describe('Role: superadmin', () => {
 });
 
 describe('Role: admin', () => {
-  let token;
-  let admin;
-  beforeEach(() => {
-    const AdminCreation = async () => {
-      admin = await new User({
-        name: 'Admin',
-        lastname: 'Admin',
-        email: 'admin@meblabs.com',
-        password: 'testtest',
-        active: true,
-        company: {
-          id: company1.id,
-          name: company1.name,
-          roles: ['admin']
-        }
-      }).save();
+  describe('GET /balance', () => {
+    test('Get all transactions', () =>
+      agent
+        .get('/balance?sorter=date')
+        .set('Cookie', `accessToken=${adminToken}`)
+        .expect(200)
+        .then(res =>
+          expect(res.body).toStrictEqual({
+            transactions: [
+              {
+                _id: balance1.id,
+                userId: expect.any(String),
+                value: 100,
+                isExpense: false,
+                description: 'Weekly food shopping',
+                date: new Date('2025-01-14').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              },
+              {
+                _id: balance2.id,
+                userId: expect.any(String),
+                value: 120,
+                isExpense: false,
+                description: 'Monthly salary',
+                date: new Date('2025-01-27').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              },
+              {
+                _id: balance3.id,
+                userId: expect.any(String),
+                value: 250,
+                isExpense: true,
+                description: 'Dinner with friends',
+                date: new Date('2025-01-31').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              }
+            ],
+            balance: {
+              totalIncome: 220,
+              totalExpense: 250,
+              totalBalance: -30
+            }
+          })
+        ));
 
-      token = genereteAuthToken(admin).token;
-    };
+    test('Get all transactions filtered by isExpense', () =>
+      agent
+        .get('/balance?sorter=date&isExpense=false')
+        .set('Cookie', `accessToken=${adminToken}`)
+        .expect(200)
+        .then(res =>
+          expect(res.body).toStrictEqual({
+            transactions: [
+              {
+                _id: balance1.id,
+                userId: expect.any(String),
+                value: 100,
+                isExpense: false,
+                description: 'Weekly food shopping',
+                date: new Date('2025-01-14').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              },
+              {
+                _id: balance2.id,
+                userId: expect.any(String),
+                value: 120,
+                isExpense: false,
+                description: 'Monthly salary',
+                date: new Date('2025-01-27').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              }
+            ],
+            balance: {
+              totalIncome: 220,
+              totalExpense: 250,
+              totalBalance: -30
+            }
+          })
+        ));
 
-    return AdminCreation();
+    test('Get all transactions filtered by description', () =>
+      agent
+        .get('/balance?sorter=date&filter=mon')
+        .set('Cookie', `accessToken=${adminToken}`)
+        .expect(200)
+        .then(res =>
+          expect(res.body).toStrictEqual({
+            transactions: [
+              {
+                _id: balance2.id,
+                userId: expect.any(String),
+                value: 120,
+                isExpense: false,
+                description: 'Monthly salary',
+                date: new Date('2025-01-27').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              }
+            ],
+            balance: {
+              totalIncome: 220,
+              totalExpense: 250,
+              totalBalance: -30
+            }
+          })
+        ));
+
+    test('Get all transactions sorted by decreasing value', () =>
+      agent
+        .get('/balance?sorter=-value&isExpense=false')
+        .set('Cookie', `accessToken=${adminToken}`)
+        .expect(200)
+        .then(res =>
+          expect(res.body).toStrictEqual({
+            transactions: [
+              {
+                _id: balance2.id,
+                userId: expect.any(String),
+                value: 120,
+                isExpense: false,
+                description: 'Monthly salary',
+                date: new Date('2025-01-27').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              },
+              {
+                _id: balance1.id,
+                userId: expect.any(String),
+                value: 100,
+                isExpense: false,
+                description: 'Weekly food shopping',
+                date: new Date('2025-01-14').toISOString(),
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String)
+              }
+            ],
+            balance: {
+              totalIncome: 220,
+              totalExpense: 250,
+              totalBalance: -30
+            }
+          })
+        ));
   });
 
   describe('POST /balance', () => {
     test('Create a balance with all fields', () =>
       agent
         .post('/balance')
-        .set('Cookie', `accessToken=${token}`)
+        .set('Cookie', `accessToken=${adminToken}`)
         .send({
           userId: admin._id.toString(),
           value: 100,
@@ -251,7 +582,7 @@ describe('Role: admin', () => {
     test('Create balance with invalid userId', () =>
       agent
         .post('/balance')
-        .set('Cookie', `accessToken=${token}`)
+        .set('Cookie', `accessToken=${adminToken}`)
         .send({
           userId: 'test',
           value: 100,
@@ -271,7 +602,7 @@ describe('Role: admin', () => {
     test('Create balance with invalid value', () =>
       agent
         .post('/balance')
-        .set('Cookie', `accessToken=${token}`)
+        .set('Cookie', `accessToken=${adminToken}`)
         .send({
           userId: admin._id.toString(),
           value: 'test',
@@ -291,7 +622,7 @@ describe('Role: admin', () => {
     test('Create balance with invalid value length', () =>
       agent
         .post('/balance')
-        .set('Cookie', `accessToken=${token}`)
+        .set('Cookie', `accessToken=${adminToken}`)
         .send({
           userId: admin._id.toString(),
           value: 100000,
@@ -311,7 +642,7 @@ describe('Role: admin', () => {
     test('Create balance with invalid isExpense', () =>
       agent
         .post('/balance')
-        .set('Cookie', `accessToken=${token}`)
+        .set('Cookie', `accessToken=${adminToken}`)
         .send({
           userId: admin._id.toString(),
           value: 100,
@@ -331,7 +662,7 @@ describe('Role: admin', () => {
     test('Create balance with invalid description', () =>
       agent
         .post('/balance')
-        .set('Cookie', `accessToken=${token}`)
+        .set('Cookie', `accessToken=${adminToken}`)
         .send({
           userId: admin._id.toString(),
           value: 100,
@@ -351,7 +682,7 @@ describe('Role: admin', () => {
     test('Create balance with invalid date', () =>
       agent
         .post('/balance')
-        .set('Cookie', `accessToken=${token}`)
+        .set('Cookie', `accessToken=${adminToken}`)
         .send({
           userId: admin._id.toString(),
           value: 100,
@@ -392,6 +723,11 @@ describe('Role: user', () => {
     };
 
     return UserCreation();
+  });
+
+  describe('GET /balance', () => {
+    test('Get a balance not allowed', () =>
+      agent.get('/balance?sorter=date').set('Cookie', `accessToken=${token}`).expect(403));
   });
 
   describe('POST /balance', () => {
