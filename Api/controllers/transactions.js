@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const User = require('../models/user');
 const Transaction = require('../models/transaction');
 const { SendData, ServerError, NotFound, Unauthorized } = require('../helpers/response');
 const getter = require('../helpers/getter');
