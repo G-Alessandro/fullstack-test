@@ -19,6 +19,7 @@ router
     isAuth,
     rbac('transactions', 'update'),
     controller.update
-  );
+  )
+  .delete(validator({ params: 'id' }), isAuth, rbac('transactions', 'delete'), controller.delete);
 
 module.exports = router;
