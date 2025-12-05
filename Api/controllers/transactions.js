@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
+const User = require('../models/user');
 const Transaction = require('../models/transaction');
 const { SendData, ServerError, NotFound, Unauthorized } = require('../helpers/response');
 const getter = require('../helpers/getter');
-const { canGetTransaction, canUpdateTransaction } = require('../rbac/transaction');
+const { canGetTransaction, canUpdateTransaction, canDeleteTransaction } = require('../rbac/transaction');
 
 module.exports.get = async (req, res, next) => {
   try {
@@ -108,6 +109,27 @@ exports.update = async ({ params: { id }, body }, { locals: { user } }, next) =>
     await data.save();
 
     return next(SendData(targetTransaction.response('cp')));
+  } catch (err) {
+    return next(ServerError(err));
+  }
+};
+
+module.exports.delete = async ({ params: { id } }, { locals: { user } }, next) => {
+  try {
+    const targetTransaction = await canDeleteTransaction(user, id);
+    if (targetTransaction === null) return next(NotFound());
+    if (!targetTransaction) return next(Unauthorized());
+
+    targetTransaction.__history = {
+      event: 'delete',
+      method: 'delete',
+      user: user.id,
+      company: user.company.id
+    };
+
+    await targetTransaction.softDelete();
+
+    return next(SendData({ message: 'Transaction deleted successfully' }));
   } catch (err) {
     return next(ServerError(err));
   }
