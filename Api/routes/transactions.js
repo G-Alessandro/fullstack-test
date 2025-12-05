@@ -10,4 +10,14 @@ router
   .route('/')
   .get(isAuth, rbac('transactions', 'read'), controller.get)
   .post(validator('createTransaction'), isAuth, rbac('transactions', 'create'), controller.create);
+
+router
+  .route('/:id')
+  .patch(
+    validator({ params: 'id', body: 'updateTransaction' }),
+    isAuth,
+    rbac('transactions', 'update'),
+    controller.update
+  );
+
 module.exports = router;
