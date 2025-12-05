@@ -441,6 +441,15 @@ describe('Role: superadmin', () => {
           })
         ));
   });
+
+  describe('DELETE /transactions/:id', () => {
+    test('Deleting transaction)', async () =>
+      agent
+        .delete(`/transactions/${transaction1.id}`)
+        .set('Cookie', `accessToken=${token}`)
+        .expect(200)
+        .then(res => expect(res.body).toStrictEqual({ message: 'Transaction deleted successfully' })));
+  });
 });
 
 describe('Role: admin', () => {
@@ -825,6 +834,35 @@ describe('Role: admin', () => {
         .expect(401);
     });
   });
+
+  describe('DELETE /transactions/:id', () => {
+    test('Deleting transaction', async () =>
+      agent
+        .delete(`/transactions/${transaction1.id}`)
+        .set('Cookie', `accessToken=${adminToken}`)
+        .expect(200)
+        .then(res => expect(res.body).toStrictEqual({ message: 'Transaction deleted successfully' })));
+
+    test('Cannot delete other users transactions', async () => {
+      const tmpUser = await new User({
+        name: 'Tmp',
+        lastname: 'User',
+        email: 'tmp@tmp.com',
+        password: 'testtest',
+        company: { id: company1.id, name: 'Company1', roles: ['user'] }
+      }).save();
+
+      const tmpTransactions = await new Transaction({
+        userId: tmpUser._id.toString(),
+        value: 100,
+        isExpense: false,
+        description: 'Weekly food shopping',
+        date: '2025-01-14'
+      }).save();
+
+      return agent.delete(`/companies/${tmpTransactions.id}`).set('Cookie', `accessToken=${adminToken}`).expect(403);
+    });
+  });
 });
 
 describe('Role: user', () => {
@@ -883,5 +921,10 @@ describe('Role: user', () => {
         .send({ value: 500, description: 'test' })
         .set('Cookie', `accessToken=${token}`)
         .expect(403));
+  });
+
+  describe('DELETE /transactions/:id', () => {
+    test('Deleting transaction not allowed', async () =>
+      agent.delete(`/transactions/${transaction1.id}`).set('Cookie', `accessToken=${token}`).expect(403));
   });
 });
