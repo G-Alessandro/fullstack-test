@@ -401,6 +401,26 @@ describe('Role: superadmin', () => {
         ));
   });
 
+  describe('GET /transactions/:id', () => {
+    test('Get specific transaction', () =>
+      agent
+        .get(`/transactions/${transaction1.id}`)
+        .set('Cookie', `accessToken=${token}`)
+        .expect(200)
+        .then(res =>
+          expect(res.body).toStrictEqual({
+            _id: transaction1.id,
+            userId: expect.any(String),
+            value: 100,
+            isExpense: false,
+            description: 'Weekly food shopping',
+            date: new Date('2025-01-14').toISOString(),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String)
+          })
+        ));
+  });
+
   describe('PATCH /transactions/:id', () => {
     test('Update transaction value and description', () =>
       agent
@@ -721,6 +741,46 @@ describe('Role: admin', () => {
         ));
   });
 
+  describe('GET /transactions/:id', () => {
+    test('Get specific transaction', () =>
+      agent
+        .get(`/transactions/${transaction1.id}`)
+        .set('Cookie', `accessToken=${adminToken}`)
+        .expect(200)
+        .then(res =>
+          expect(res.body).toStrictEqual({
+            _id: transaction1.id,
+            userId: expect.any(String),
+            value: 100,
+            isExpense: false,
+            description: 'Weekly food shopping',
+            date: new Date('2025-01-14').toISOString(),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String)
+          })
+        ));
+
+    test('Get other users specific transaction not allowed', async () => {
+      const tmpUser = await new User({
+        name: 'Tmp',
+        lastname: 'User',
+        email: 'tmp@tmp.com',
+        password: 'testtest',
+        company: { id: company1.id, name: 'Company1', roles: ['user'] }
+      }).save();
+
+      const tmpTransactions = await new Transaction({
+        userId: tmpUser._id.toString(),
+        value: 100,
+        isExpense: false,
+        description: 'Weekly food shopping',
+        date: '2025-01-14'
+      }).save();
+
+      return agent.get(`/transactions/${tmpTransactions.id}`).set('Cookie', `accessToken=${adminToken}`).expect(401);
+    });
+  });
+
   describe('PATCH /transactions/:id', () => {
     test('Update transaction value and description', () =>
       agent
@@ -811,8 +871,13 @@ describe('Role: user', () => {
         .expect(403));
   });
 
+  describe('GET /transactions/:id', () => {
+    test('Get specific transaction not allowed', async () =>
+      agent.get(`/transactions/${transaction1.id}`).set('Cookie', `accessToken=${token}`).expect(403));
+  });
+
   describe('PATCH /transactions/:id', () => {
-    test('Update transactions not allowed', async () =>
+    test('Update transaction not allowed', () =>
       agent
         .patch(`/transactions/${transaction1.id}`)
         .send({ value: 500, description: 'test' })
