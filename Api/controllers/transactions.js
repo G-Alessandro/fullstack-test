@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const Transaction = require('../models/transaction');
+const { SendData, ServerError, NotFound, Unauthorized } = require('../helpers/response');
 const getter = require('../helpers/getter');
-const { SendData, ServerError } = require('../helpers/response');
+const { canUpdateTransaction } = require('../rbac/transaction');
 
 module.exports.get = async (req, res, next) => {
   try {
@@ -72,6 +73,29 @@ module.exports.create = async (req, { locals: { user } }, next) => {
     await data.save();
 
     return next(SendData(data.response('cp')));
+  } catch (err) {
+    return next(ServerError(err));
+  }
+};
+
+exports.update = async ({ params: { id }, body }, { locals: { user } }, next) => {
+  try {
+    const targetTransaction = await canUpdateTransaction(user, id);
+    if (targetTransaction === null) return next(NotFound());
+    if (!targetTransaction) return next(Unauthorized());
+
+    const data = Object.assign(targetTransaction, body);
+
+    data.__history = {
+      event: 'update',
+      method: 'patch',
+      user: user.id,
+      company: user.company.id
+    };
+
+    await data.save();
+
+    return next(SendData(targetTransaction.response('cp')));
   } catch (err) {
     return next(ServerError(err));
   }
