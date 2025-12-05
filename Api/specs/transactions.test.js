@@ -400,6 +400,27 @@ describe('Role: superadmin', () => {
           })
         ));
   });
+
+  describe('PATCH /transactions/:id', () => {
+    test('Update transaction value and description', () =>
+      agent
+        .patch(`/transactions/${transaction1.id}`)
+        .send({ value: 500, description: 'test' })
+        .set('Cookie', `accessToken=${token}`)
+        .expect(200)
+        .then(res =>
+          expect(res.body).toStrictEqual({
+            _id: transaction1.id,
+            userId: expect.any(String),
+            value: 500,
+            isExpense: false,
+            description: 'test',
+            date: new Date('2025-01-14').toISOString(),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String)
+          })
+        ));
+  });
 });
 
 describe('Role: admin', () => {
@@ -699,6 +720,51 @@ describe('Role: admin', () => {
           })
         ));
   });
+
+  describe('PATCH /transactions/:id', () => {
+    test('Update transaction value and description', () =>
+      agent
+        .patch(`/transactions/${transaction1.id}`)
+        .send({ value: 500, description: 'test' })
+        .set('Cookie', `accessToken=${adminToken}`)
+        .expect(200)
+        .then(res =>
+          expect(res.body).toStrictEqual({
+            _id: transaction1.id,
+            userId: expect.any(String),
+            value: 500,
+            isExpense: false,
+            description: 'test',
+            date: new Date('2025-01-14').toISOString(),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String)
+          })
+        ));
+
+    test('Update other users transactions not allowed', async () => {
+      const tmpUser = await new User({
+        name: 'Tmp',
+        lastname: 'User',
+        email: 'tmp@tmp.com',
+        password: 'testtest',
+        company: { id: company1.id, name: 'Company1', roles: ['user'] }
+      }).save();
+
+      const tmpTransactions = await new Transaction({
+        userId: tmpUser._id.toString(),
+        value: 100,
+        isExpense: false,
+        description: 'Weekly food shopping',
+        date: '2025-01-14'
+      }).save();
+
+      return agent
+        .patch(`/transactions/${tmpTransactions.id}`)
+        .send({ value: 500, description: 'test' })
+        .set('Cookie', `accessToken=${adminToken}`)
+        .expect(401);
+    });
+  });
 });
 
 describe('Role: user', () => {
@@ -742,6 +808,15 @@ describe('Role: user', () => {
           description: 'Weekly food shopping',
           date: '2025-01-14'
         })
+        .expect(403));
+  });
+
+  describe('PATCH /transactions/:id', () => {
+    test('Update transactions not allowed', async () =>
+      agent
+        .patch(`/transactions/${transaction1.id}`)
+        .send({ value: 500, description: 'test' })
+        .set('Cookie', `accessToken=${token}`)
         .expect(403));
   });
 });
