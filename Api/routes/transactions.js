@@ -13,6 +13,7 @@ router
 
 router
   .route('/:id')
+  .get(validator({ params: 'id' }), isAuth, rbac('transactions', 'read'), controller.getById)
   .patch(
     validator({ params: 'id', body: 'updateTransaction' }),
     isAuth,
