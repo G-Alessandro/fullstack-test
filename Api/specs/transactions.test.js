@@ -50,7 +50,7 @@ beforeEach(async () => {
     adminToken = genereteAuthToken(admin).token;
   };
 
-  const Balance1Creation = async () => {
+  const Transaction1Creation = async () => {
     transaction1 = await new Transaction({
       userId: admin._id.toString(),
       value: 100,
@@ -59,7 +59,7 @@ beforeEach(async () => {
       date: '2025-01-14'
     }).save();
   };
-  const Balance2Creation = async () => {
+  const Transaction2Creation = async () => {
     transaction2 = await new Transaction({
       userId: admin._id.toString(),
       value: 120,
@@ -68,7 +68,7 @@ beforeEach(async () => {
       date: '2025-01-27'
     }).save();
   };
-  const Balance3Creation = async () => {
+  const Transaction3Creation = async () => {
     transaction3 = await new Transaction({
       userId: admin._id.toString(),
       value: 250,
@@ -79,7 +79,7 @@ beforeEach(async () => {
   };
   return Company1Creation()
     .then(() => AdminCreation())
-    .then(() => Promise.all([Balance1Creation(), Balance2Creation(), Balance3Creation()]));
+    .then(() => Promise.all([Transaction1Creation(), Transaction2Creation(), Transaction3Creation()]));
 });
 afterEach(async () => await jest.clearAllMocks());
 afterAll(async () => await db.close());
