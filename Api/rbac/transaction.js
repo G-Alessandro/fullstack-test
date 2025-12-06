@@ -17,10 +17,10 @@ const transactionRbac = async (caller, resourceId, { authorizedRoles = [] }) => 
 };
 
 module.exports.canGetTransaction = (caller, resourceId) =>
-  transactionRbac(caller, resourceId, { authorizedRoles: ['admin', 'user'] });
+  transactionRbac(caller, resourceId, { authorizedRoles: ['user'] });
 
 module.exports.canUpdateTransaction = (caller, resourceId) =>
-  transactionRbac(caller, resourceId, { authorizedRoles: ['admin'] });
+  transactionRbac(caller, resourceId, { authorizedRoles: ['user'] });
 
 module.exports.canDeleteTransaction = (caller, resourceId) =>
-  transactionRbac(caller, resourceId, { authorizedRoles: ['admin'] });
+  transactionRbac(caller, resourceId, { authorizedRoles: ['user'] });
