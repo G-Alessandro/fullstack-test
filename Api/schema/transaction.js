@@ -7,9 +7,9 @@ module.exports = {
       userId: { $ref: 'objectId' },
       isExpense: { type: 'boolean' },
       description: { type: 'string', maxLength: 120 },
-      date: { type: 'string', format: 'date' }
+      date: { type: 'string', format: 'date-time' }
     },
-    required: ['userId', 'value', 'isExpense'],
+    required: ['value', 'isExpense', 'date'],
     additionalProperties: false
   },
   updateTransaction: {
@@ -20,7 +20,7 @@ module.exports = {
       userId: { $ref: 'objectId' },
       isExpense: { type: 'boolean' },
       description: { type: 'string', maxLength: 120 },
-      date: { type: 'string', format: 'date' }
+      date: { type: 'string', format: 'date-time' }
     },
     required: [],
     additionalProperties: false
