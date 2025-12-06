@@ -9,8 +9,8 @@ const { genereteAuthToken } = require('../helpers/auth');
 
 const agent = supertest.agent(app);
 
-let admin;
-let adminToken;
+let user;
+let userToken;
 let company1;
 let transaction1;
 let transaction2;
@@ -34,25 +34,25 @@ beforeEach(async () => {
   };
 
   const AdminCreation = async () => {
-    admin = await new User({
-      name: 'Admin',
-      lastname: 'Admin',
-      email: 'admin@meblabs.com',
+    user = await new User({
+      name: 'User',
+      lastname: 'User',
+      email: 'user@meblabs.com',
       password: 'testtest',
       active: true,
       company: {
         id: company1.id,
         name: company1.name,
-        roles: ['admin']
+        roles: ['user']
       }
     }).save();
 
-    adminToken = genereteAuthToken(admin).token;
+    userToken = genereteAuthToken(user).token;
   };
 
   const Transaction1Creation = async () => {
     transaction1 = await new Transaction({
-      userId: admin._id.toString(),
+      userId: user._id.toString(),
       value: 100,
       isExpense: false,
       description: 'Weekly food shopping',
@@ -61,7 +61,7 @@ beforeEach(async () => {
   };
   const Transaction2Creation = async () => {
     transaction2 = await new Transaction({
-      userId: admin._id.toString(),
+      userId: user._id.toString(),
       value: 120,
       isExpense: false,
       description: 'Monthly salary',
@@ -70,7 +70,7 @@ beforeEach(async () => {
   };
   const Transaction3Creation = async () => {
     transaction3 = await new Transaction({
-      userId: admin._id.toString(),
+      userId: user._id.toString(),
       value: 250,
       isExpense: true,
       description: 'Dinner with friends',
@@ -427,11 +427,74 @@ describe('Role: superadmin', () => {
 });
 
 describe('Role: admin', () => {
+  let token;
+  let admin;
+  beforeEach(() => {
+    const UserCreation = async () => {
+      admin = await new User({
+        name: 'Admin',
+        lastname: 'Admin',
+        email: 'admin@meblabs.com',
+        password: 'testtest',
+        active: true,
+        company: {
+          id: company1.id,
+          name: company1.name,
+          roles: ['admin']
+        }
+      }).save();
+
+      token = genereteAuthToken(admin).token;
+    };
+
+    return UserCreation();
+  });
+
+  describe('GET /transactions', () => {
+    test('Get a transactions not allowed', () =>
+      agent.get('/transactions?sorter=date').set('Cookie', `accessToken=${token}`).expect(403));
+  });
+
+  describe('POST /transactions', () => {
+    test('Create a transaction not allowed', () =>
+      agent
+        .post('/transactions')
+        .set('Cookie', `accessToken=${token}`)
+        .send({
+          value: '100',
+          isExpense: 'false',
+          description: 'Weekly food shopping',
+          date: '2025-12-06T19:14:38.600Z'
+        })
+        .expect(403));
+  });
+
+  describe('GET /transactions/:id', () => {
+    test('Get specific transaction not allowed', async () =>
+      agent.get(`/transactions/${transaction1.id}`).set('Cookie', `accessToken=${token}`).expect(403));
+  });
+
+  describe('PATCH /transactions/:id', () => {
+    test('Update transaction not allowed', () =>
+      agent
+        .patch(`/transactions/${transaction1.id}`)
+        .send({ value: 500, description: 'test' })
+        .set('Cookie', `accessToken=${token}`)
+        .expect(403));
+  });
+
+  describe('DELETE /transactions/:id', () => {
+    test('Deleting transaction not allowed', async () =>
+      agent.delete(`/transactions/${transaction1.id}`).set('Cookie', `accessToken=${token}`).expect(403));
+  });
+});
+
+describe('Role: user', () => {
   describe('GET /transactions', () => {
     test('Get all transactions', () =>
       agent
         .get('/transactions?sorter=date')
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .expect(200)
         .then(res =>
           expect(res.body).toStrictEqual({
@@ -478,7 +541,7 @@ describe('Role: admin', () => {
     test('Get all transactions filtered by isExpense', () =>
       agent
         .get('/transactions?sorter=date&isExpense=false')
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .expect(200)
         .then(res =>
           expect(res.body).toStrictEqual({
@@ -515,7 +578,7 @@ describe('Role: admin', () => {
     test('Get all transactions filtered by description', () =>
       agent
         .get('/transactions?sorter=date&filter=mon')
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .expect(200)
         .then(res =>
           expect(res.body).toStrictEqual({
@@ -542,7 +605,7 @@ describe('Role: admin', () => {
     test('Get all transactions sorted by decreasing value', () =>
       agent
         .get('/transactions?sorter=-value&isExpense=false')
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .expect(200)
         .then(res =>
           expect(res.body).toStrictEqual({
@@ -581,7 +644,7 @@ describe('Role: admin', () => {
     test('Create a transaction with all fields', () =>
       agent
         .post('/transactions')
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .send({
           value: '100',
           isExpense: 'false',
@@ -592,7 +655,7 @@ describe('Role: admin', () => {
         .then(res =>
           expect(res.body).toStrictEqual({
             _id: expect.any(String),
-            userId: admin._id.toString(),
+            userId: user._id.toString(),
             value: 100,
             isExpense: false,
             description: 'Weekly food shopping',
@@ -605,7 +668,7 @@ describe('Role: admin', () => {
     test('Create transaction with invalid value', () =>
       agent
         .post('/transactions')
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .send({
           value: 'test',
           isExpense: 'false',
@@ -624,7 +687,7 @@ describe('Role: admin', () => {
     test('Create transaction with invalid value length', () =>
       agent
         .post('/transactions')
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .send({
           value: '100000',
           isExpense: 'false',
@@ -643,7 +706,7 @@ describe('Role: admin', () => {
     test('Create transaction with invalid isExpense', () =>
       agent
         .post('/transactions')
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .send({
           value: '100',
           isExpense: 'test',
@@ -662,7 +725,7 @@ describe('Role: admin', () => {
     test('Create transaction with invalid description', () =>
       agent
         .post('/transactions')
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .send({
           value: '100',
           isExpense: 'false',
@@ -681,7 +744,7 @@ describe('Role: admin', () => {
     test('Create transaction with invalid date', () =>
       agent
         .post('/transactions')
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .send({
           value: '100',
           isExpense: 'false',
@@ -702,7 +765,7 @@ describe('Role: admin', () => {
     test('Get specific transaction', () =>
       agent
         .get(`/transactions/${transaction1.id}`)
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .expect(200)
         .then(res =>
           expect(res.body).toStrictEqual({
@@ -731,10 +794,10 @@ describe('Role: admin', () => {
         value: 100,
         isExpense: false,
         description: 'Weekly food shopping',
-        date: '2025-01-14'
+        date: new Date('2025-01-14').toISOString()
       }).save();
 
-      return agent.get(`/transactions/${tmpTransactions.id}`).set('Cookie', `accessToken=${adminToken}`).expect(401);
+      return agent.get(`/transactions/${tmpTransactions.id}`).set('Cookie', `accessToken=${userToken}`).expect(401);
     });
   });
 
@@ -743,7 +806,7 @@ describe('Role: admin', () => {
       agent
         .patch(`/transactions/${transaction1.id}`)
         .send({ value: 500, description: 'test' })
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .expect(200)
         .then(res =>
           expect(res.body).toStrictEqual({
@@ -772,13 +835,13 @@ describe('Role: admin', () => {
         value: 100,
         isExpense: false,
         description: 'Weekly food shopping',
-        date: '2025-01-14'
+        date: new Date('2025-01-14').toISOString()
       }).save();
 
       return agent
         .patch(`/transactions/${tmpTransactions.id}`)
         .send({ value: 500, description: 'test' })
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .expect(401);
     });
   });
@@ -787,7 +850,7 @@ describe('Role: admin', () => {
     test('Deleting transaction', async () =>
       agent
         .delete(`/transactions/${transaction1.id}`)
-        .set('Cookie', `accessToken=${adminToken}`)
+        .set('Cookie', `accessToken=${userToken}`)
         .expect(200)
         .then(res => expect(res.body).toStrictEqual({ message: 'Transaction deleted successfully' })));
 
@@ -805,73 +868,10 @@ describe('Role: admin', () => {
         value: 100,
         isExpense: false,
         description: 'Weekly food shopping',
-        date: '2025-01-14'
+        date: new Date('2025-01-14').toISOString()
       }).save();
 
-      return agent.delete(`/companies/${tmpTransactions.id}`).set('Cookie', `accessToken=${adminToken}`).expect(403);
+      return agent.delete(`/companies/${tmpTransactions.id}`).set('Cookie', `accessToken=${userToken}`).expect(403);
     });
-  });
-});
-
-describe('Role: user', () => {
-  let token;
-  let user;
-  beforeEach(() => {
-    const UserCreation = async () => {
-      user = await new User({
-        name: 'User',
-        lastname: 'User',
-        email: 'user@meblabs.com',
-        password: 'testtest',
-        active: true,
-        company: {
-          id: company1.id,
-          name: company1.name,
-          roles: ['user']
-        }
-      }).save();
-
-      token = genereteAuthToken(user).token;
-    };
-
-    return UserCreation();
-  });
-
-  describe('GET /transactions', () => {
-    test('Get a transactions not allowed', () =>
-      agent.get('/transactions?sorter=date').set('Cookie', `accessToken=${token}`).expect(403));
-  });
-
-  describe('POST /transactions', () => {
-    test('Create a transaction not allowed', () =>
-      agent
-        .post('/transactions')
-        .set('Cookie', `accessToken=${token}`)
-        .send({
-          value: '100',
-          isExpense: 'false',
-          description: 'Weekly food shopping',
-          date: '2025-12-06T19:14:38.600Zzz'
-        })
-        .expect(403));
-  });
-
-  describe('GET /transactions/:id', () => {
-    test('Get specific transaction not allowed', async () =>
-      agent.get(`/transactions/${transaction1.id}`).set('Cookie', `accessToken=${token}`).expect(403));
-  });
-
-  describe('PATCH /transactions/:id', () => {
-    test('Update transaction not allowed', () =>
-      agent
-        .patch(`/transactions/${transaction1.id}`)
-        .send({ value: 500, description: 'test' })
-        .set('Cookie', `accessToken=${token}`)
-        .expect(403));
-  });
-
-  describe('DELETE /transactions/:id', () => {
-    test('Deleting transaction not allowed', async () =>
-      agent.delete(`/transactions/${transaction1.id}`).set('Cookie', `accessToken=${token}`).expect(403));
   });
 });
