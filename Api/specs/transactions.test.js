@@ -260,11 +260,10 @@ describe('Role: superadmin', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${token}`)
         .send({
-          userId: superuser._id.toString(),
-          value: 100,
-          isExpense: false,
+          value: '100',
+          isExpense: 'false',
           description: 'Weekly food shopping',
-          date: '2025-01-14'
+          date: '2025-12-06T19:14:38.600Z'
         })
         .expect(200)
         .then(res =>
@@ -274,29 +273,9 @@ describe('Role: superadmin', () => {
             value: 100,
             isExpense: false,
             description: 'Weekly food shopping',
-            date: new Date('2025-01-14').toISOString(),
+            date: '2025-12-06T19:14:38.600Z',
             createdAt: expect.any(String),
             updatedAt: expect.any(String)
-          })
-        ));
-
-    test('Create transaction with invalid userId', () =>
-      agent
-        .post('/transactions')
-        .set('Cookie', `accessToken=${token}`)
-        .send({
-          userId: 'test',
-          value: 100,
-          isExpense: false,
-          description: 'Weekly food shopping',
-          date: '2025-01-14'
-        })
-        .expect(400)
-        .then(res =>
-          expect(res.body).toStrictEqual({
-            error: 200,
-            message: 'Validation error',
-            data: '/userId'
           })
         ));
 
@@ -305,11 +284,10 @@ describe('Role: superadmin', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${token}`)
         .send({
-          userId: superuser._id.toString(),
           value: 'test',
-          isExpense: false,
+          isExpense: 'false',
           description: 'Weekly food shopping',
-          date: '2025-01-14'
+          date: '2025-12-06T19:14:38.600Z'
         })
         .expect(400)
         .then(res =>
@@ -325,11 +303,10 @@ describe('Role: superadmin', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${token}`)
         .send({
-          userId: superuser._id.toString(),
-          value: 100000,
-          isExpense: false,
+          value: '100000',
+          isExpense: 'false',
           description: 'Weekly food shopping',
-          date: '2025-01-14'
+          date: '2025-12-06T19:14:38.600Z'
         })
         .expect(400)
         .then(res =>
@@ -345,11 +322,10 @@ describe('Role: superadmin', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${token}`)
         .send({
-          userId: superuser._id.toString(),
-          value: 100,
+          value: '100',
           isExpense: 'test',
           description: 'Weekly food shopping',
-          date: '2025-01-14'
+          date: '2025-12-06T19:14:38.600Z'
         })
         .expect(400)
         .then(res =>
@@ -365,11 +341,10 @@ describe('Role: superadmin', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${token}`)
         .send({
-          userId: superuser._id.toString(),
-          value: 100,
-          isExpense: false,
+          value: '100',
+          isExpense: 'false',
           description: 'a'.repeat(121),
-          date: '2025-01-14'
+          date: '2025-12-06T19:14:38.600Z'
         })
         .expect(400)
         .then(res =>
@@ -385,11 +360,10 @@ describe('Role: superadmin', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${token}`)
         .send({
-          userId: superuser._id.toString(),
-          value: 100,
-          isExpense: false,
+          value: '100',
+          isExpense: 'false',
           description: 'Weekly food shopping',
-          date: 'test'
+          date: '2025-12-06T19:14:38.600Zzz'
         })
         .expect(400)
         .then(res =>
@@ -609,11 +583,10 @@ describe('Role: admin', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${adminToken}`)
         .send({
-          userId: admin._id.toString(),
-          value: 100,
-          isExpense: false,
+          value: '100',
+          isExpense: 'false',
           description: 'Weekly food shopping',
-          date: '2025-01-14'
+          date: '2025-12-06T19:14:38.600Z'
         })
         .expect(200)
         .then(res =>
@@ -623,29 +596,9 @@ describe('Role: admin', () => {
             value: 100,
             isExpense: false,
             description: 'Weekly food shopping',
-            date: new Date('2025-01-14').toISOString(),
+            date: '2025-12-06T19:14:38.600Z',
             createdAt: expect.any(String),
             updatedAt: expect.any(String)
-          })
-        ));
-
-    test('Create transaction with invalid userId', () =>
-      agent
-        .post('/transactions')
-        .set('Cookie', `accessToken=${adminToken}`)
-        .send({
-          userId: 'test',
-          value: 100,
-          isExpense: false,
-          description: 'Weekly food shopping',
-          date: '2025-01-14'
-        })
-        .expect(400)
-        .then(res =>
-          expect(res.body).toStrictEqual({
-            error: 200,
-            message: 'Validation error',
-            data: '/userId'
           })
         ));
 
@@ -654,11 +607,10 @@ describe('Role: admin', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${adminToken}`)
         .send({
-          userId: admin._id.toString(),
           value: 'test',
-          isExpense: false,
+          isExpense: 'false',
           description: 'Weekly food shopping',
-          date: '2025-01-14'
+          date: '2025-12-06T19:14:38.600Z'
         })
         .expect(400)
         .then(res =>
@@ -674,11 +626,10 @@ describe('Role: admin', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${adminToken}`)
         .send({
-          userId: admin._id.toString(),
-          value: 100000,
-          isExpense: false,
+          value: '100000',
+          isExpense: 'false',
           description: 'Weekly food shopping',
-          date: '2025-01-14'
+          date: '2025-12-06T19:14:38.600Z'
         })
         .expect(400)
         .then(res =>
@@ -694,11 +645,10 @@ describe('Role: admin', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${adminToken}`)
         .send({
-          userId: admin._id.toString(),
-          value: 100,
+          value: '100',
           isExpense: 'test',
           description: 'Weekly food shopping',
-          date: '2025-01-14'
+          date: '2025-12-06T19:14:38.600Z'
         })
         .expect(400)
         .then(res =>
@@ -714,11 +664,10 @@ describe('Role: admin', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${adminToken}`)
         .send({
-          userId: admin._id.toString(),
-          value: 100,
-          isExpense: false,
+          value: '100',
+          isExpense: 'false',
           description: 'a'.repeat(121),
-          date: '2025-01-14'
+          date: '2025-12-06T19:14:38.600Z'
         })
         .expect(400)
         .then(res =>
@@ -734,11 +683,10 @@ describe('Role: admin', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${adminToken}`)
         .send({
-          userId: admin._id.toString(),
-          value: 100,
-          isExpense: false,
+          value: '100',
+          isExpense: 'false',
           description: 'Weekly food shopping',
-          date: 'test'
+          date: '2025-12-06T19:14:38.600Zzz'
         })
         .expect(400)
         .then(res =>
@@ -900,11 +848,10 @@ describe('Role: user', () => {
         .post('/transactions')
         .set('Cookie', `accessToken=${token}`)
         .send({
-          userId: user._id.toString(),
-          value: 100,
-          isExpense: false,
+          value: '100',
+          isExpense: 'false',
           description: 'Weekly food shopping',
-          date: '2025-01-14'
+          date: '2025-12-06T19:14:38.600Zzz'
         })
         .expect(403));
   });
