@@ -1,4 +1,4 @@
-import { DatePicker, Form, Input, Radio, Select } from 'antd';
+import { DatePicker, Form, Input, InputNumber, Radio, Select } from 'antd';
 import { t } from 'i18next';
 import dayjs from 'dayjs';
 import { useContext } from 'react';
@@ -113,6 +113,24 @@ const ProceduralFormItem = ({ item, form, disabled, wrapperCol }) => {
             ]}
           >
             <DatePicker locale={antLocale} format={data => dayjs(data).format('DD/MM/YYYY')} />
+          </Form.Item>
+        );
+        break;
+
+      case 'number':
+        template = (
+          <Form.Item
+            wrapperCol={wrapperCol}
+            name={_item.name}
+            label={_item.title}
+            rules={[
+              {
+                required: _item.isRequired,
+                message: t('validation.required')
+              }
+            ]}
+          >
+            <InputNumber min={item?.min} max={item?.max} step={item?.step} />
           </Form.Item>
         );
 
