@@ -8,7 +8,7 @@ const { Schema } = mongoose;
 const schema = Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    value: { type: Number, min: 1, max: 99999, required: true },
+    value: { type: Number, min: 0.01, max: 99999, required: true },
     isExpense: { type: Boolean, required: true },
     description: { type: String, maxLength: 120 },
     date: { type: Date, required: true, default: Date.now }
