@@ -25,6 +25,7 @@ const Table = ({
   rightActions,
   className,
   tableClassName,
+  rowClassName,
   addForm,
   setupAddForm,
   onEscape = () => {},
@@ -210,7 +211,15 @@ const Table = ({
           fixed: 'left',
           render: (_, record) => (
             <Form.Item>
-              <Button type="text" size="small" className="btn-edit" onClick={event => onEdit(record, event)}>
+              <Button
+                type="text"
+                size="small"
+                className="btn-edit"
+                onClick={event => {
+                  setIsModalOpen(true);
+                  onEdit(record, event);
+                }}
+              >
                 <FontAwesomeIcon icon={faEdit} />
               </Button>
             </Form.Item>
@@ -324,6 +333,7 @@ const Table = ({
         pagination={pagination}
         showSorterTooltip={false}
         className={tableClassName}
+        rowClassName={rowClassName}
       />
     </InfiniteScroll>
   ) : (
@@ -335,6 +345,7 @@ const Table = ({
       pagination={pagination}
       showSorterTooltip={false}
       className={tableClassName}
+      rowClassName={rowClassName}
     />
   );
 
