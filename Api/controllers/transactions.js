@@ -10,7 +10,7 @@ module.exports.get = async (req, res, next) => {
     const { user } = res.locals;
     const query = {};
 
-    if (user.company.roles.includes('admin') || user.roles.includes('admin')) {
+    if (user.company.roles.includes('user') || user.roles.includes('user')) {
       query.userId = new mongoose.Types.ObjectId(user.id);
     }
 
