@@ -3,7 +3,7 @@ module.exports = {
     $id: 'createTransaction',
     type: 'object',
     properties: {
-      value: { type: 'number', minimum: 1, maximum: 99999 },
+      value: { type: 'number', minimum: 0.01, maximum: 99999 },
       userId: { $ref: 'objectId' },
       isExpense: { type: 'boolean' },
       description: { type: 'string', maxLength: 120 },
@@ -16,7 +16,7 @@ module.exports = {
     $id: 'updateTransaction',
     type: 'object',
     properties: {
-      value: { type: 'number', minimum: 1, maximum: 99999 },
+      value: { type: 'number', minimum: 0.01, maximum: 99999 },
       userId: { $ref: 'objectId' },
       isExpense: { type: 'boolean' },
       description: { type: 'string', maxLength: 120 },
