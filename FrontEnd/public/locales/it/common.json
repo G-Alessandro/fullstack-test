@@ -46,6 +46,20 @@
     "new": "Nuovo",
     "ok": "Ok"
   },
+  "transaction": {
+    "totalIncome": "Totale Entrate",
+    "totalExpense": "Totale Spese",
+    "totalBalance": "Totale Saldo",
+    "table": { "value": "Valore", "description": "Descrizione", "date": "Data" },
+    "formTitle": { "newTransaction": "Nuova Transazione", "editTransaction": "Modifica Transazione" },
+    "formFields": {
+      "amount": "Quantità",
+      "isExpense": "È una spesa?",
+      "description": "Descrizione",
+      "date": "Data"
+    }
+  },
+
   "login": {
     "btn": "Accedi",
     "title": "Accedi a {{project}}",
