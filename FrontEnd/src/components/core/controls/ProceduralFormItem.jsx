@@ -48,7 +48,7 @@ const ProceduralFormItem = ({ item, form, disabled, wrapperCol }) => {
               }
             ]}
           >
-            <Input.TextArea autoSize={_item.autoSize} placeholder={_item.placeholder} />
+            <Input.TextArea autoSize={_item.autoSize} placeholder={_item.placeholder} maxLength={_item.maxLength} />
           </Form.Item>
         );
 
