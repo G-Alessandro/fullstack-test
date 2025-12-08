@@ -46,6 +46,14 @@
     "new": "Nuovo",
     "ok": "Ok"
   },
+  "transaction": {
+    "totalIncome": "Total Income",
+    "totalExpense": "Total Expense",
+    "totalBalance": "Total Balance",
+    "table": { "value": "Value", "description": "Description", "date": "Date" },
+    "formTitle": { "newTransaction": "New Transaction", "editTransaction": "Edit Transaction" },
+    "formFields": { "amount": "Amount", "isExpense": "Is Expense?", "description": "Description", "date": "Date" }
+  },
   "login": {
     "btn": "Sign In",
     "title": "Sign in {{project}}",
