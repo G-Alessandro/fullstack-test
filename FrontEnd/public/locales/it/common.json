@@ -53,10 +53,10 @@
     "table": { "value": "Valore", "description": "Descrizione", "date": "Data" },
     "formTitle": { "newTransaction": "Nuova Transazione", "editTransaction": "Modifica Transazione" },
     "formFields": {
-      "amount": "Quantità",
-      "isExpense": "È una spesa?",
-      "description": "Descrizione",
-      "date": "Data"
+      "amount": { "title": "Quantità", "placeholder": "99999Max" },
+      "isExpense": { "title": "È una spesa?" },
+      "description": { "title": "Descrizione", "placeholder": "Max 120 caratteri" },
+      "date": { "title": "Data " }
     }
   },
 
