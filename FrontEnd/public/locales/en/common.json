@@ -52,7 +52,12 @@
     "totalBalance": "Total Balance",
     "table": { "value": "Value", "description": "Description", "date": "Date" },
     "formTitle": { "newTransaction": "New Transaction", "editTransaction": "Edit Transaction" },
-    "formFields": { "amount": "Amount", "isExpense": "Is Expense?", "description": "Description", "date": "Date" }
+    "formFields": {
+      "amount": { "title": "Amount", "placeholder": "99999Max" },
+      "isExpense": { "title": "Is Expense?" },
+      "description": { "title": "Description", "placeholder": "Max 120 characters" },
+      "date": { "title": "Date " }
+    }
   },
   "login": {
     "btn": "Sign In",
