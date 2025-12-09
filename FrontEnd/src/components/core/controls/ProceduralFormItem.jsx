@@ -69,8 +69,8 @@ const ProceduralFormItem = ({ item, form, disabled, wrapperCol }) => {
           >
             {!disabled ? (
               <Radio.Group>
-                <Radio value>Sì</Radio>
-                <Radio value={false}>No</Radio>
+                <Radio value>{t('common.yes')}</Radio>
+                <Radio value={false}>{t('common.no')}</Radio>
               </Radio.Group>
             ) : (
               <span>{form.getFieldValue(_item.name) ? t('common.yes') : t('common.no')}</span>
