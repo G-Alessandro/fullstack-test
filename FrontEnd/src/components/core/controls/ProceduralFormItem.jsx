@@ -130,7 +130,7 @@ const ProceduralFormItem = ({ item, form, disabled, wrapperCol }) => {
               }
             ]}
           >
-            <InputNumber min={item?.min} max={item?.max} step={item?.step} />
+            <InputNumber min={item?.min} max={item?.max} step={item?.step} placeholder={_item.placeholder} />
           </Form.Item>
         );
 
