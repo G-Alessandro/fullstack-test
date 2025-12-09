@@ -14,3 +14,35 @@
     @apply w-full md:w-auto md:flex-none;
   }
 }
+
+/*Rende trasparente il colore di default della colonna quando si usa sort*/
+.ant-table-wrapper td.ant-table-column-sort {
+  background-color: transparent;
+}
+
+.ant-table-cell {
+  border-right: 1px solid #d9d9d9;
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.row-income {
+  background-color: #e6ffe6;
+}
+
+.row-expense {
+  background-color: #ffe6e6;
+}
+
+/* Dark mode*/
+.dark .ant-table-cell {
+  border-right: 1px solid #444;
+  border-bottom: 1px solid #444;
+}
+
+.dark .row-income {
+  background-color: #306317;
+}
+
+.dark .row-expense {
+  background-color: #791a1f;
+}
