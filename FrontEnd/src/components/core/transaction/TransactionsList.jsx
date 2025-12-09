@@ -7,7 +7,7 @@ import Api from '../../../helpers/core/Api';
 import ContentPanel from '../layout/ContentPanel';
 import Table from '../table/Table';
 import TransactionsBalance from './TransactionsBalance';
-import { TransactionsForm, transactionFormSubmit } from './TransactionFrom';
+import { TransactionForm, transactionFormSubmit } from './TransactionFrom';
 
 const TransactionsList = () => {
   const { t } = useTranslation();
@@ -81,7 +81,7 @@ const TransactionsList = () => {
   // Configurazione form per l'aggiunta o modifica di una nuova transazione
   const addFormConfig = {
     title: t(`transaction.formTitle.${editTransaction ? 'editTransaction' : 'newTransaction'}`),
-    template: <TransactionsForm form={form} record={transactionRecord} editTransaction={editTransaction} />,
+    template: <TransactionForm form={form} record={transactionRecord} editTransaction={editTransaction} />,
     onSave: async () => {
       const method = editTransaction ? 'patch' : 'post';
       const transactionId = await transactionRecord?._id;
